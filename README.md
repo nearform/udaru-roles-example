@@ -1,0 +1,6 @@
+ - To start PostgreSQL: `docker-compose up -d`
+ - To initialise PostgreSQL: `npm run pg:init`
+ - To start the back end: `node server &`
+ - To create Udaru users, policies, etc.: `./create-policies`
+ - To start the front end: `npm start`
+ - To clean everything up: `docker-compose down`
