@@ -1,43 +1,175 @@
 #!/usr/bin/env bash
 
-# Create the organization and owner user.
-curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: ROOTid' -d '{"id":"Org1","name":"Organization 1","description":"The First Organization","user":{"id":"Rachel","name":"Rachel Owner"}}' 'http://localhost:8080/authorization/organizations'
+# The following is a highly contrived example usage of the Udaru Management
+# and Authorizations APIs. The curl commands below are provided as examples
+# only; we do not recommend you do this in any real world platform :-)
 
-# Create a user called Sam.
-curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: Rachel'  -d '{"id":"Sam","name":"Sam Staffman"}' 'http://localhost:8080/authorization/users'
+# Note that the policies created by this script are for demo purposes only.
+# Policies should not be created directly in this way!  In a real system,
+# creating policies must be done with extreme caution -- static policies will
+# be seeded in Udaru at creation time, and dynamically created policies will
+# be created by trusted back end services.  Users must never be able to create
+# policies directly themselves. So for this demo: calls to
+# `/authorization/policies` are protected endpoints, we must pass the service
+# key, which is 123456789 in this example; you must also be an Udaru super
+# user to call this directly.  Similarly, the `/authorization/teams` end point
+# must also be called with the Udaru super user credentials.
+
+# Create the organization and organization super user.  The ROOTid user was
+# created during the execution of `npm run pg:init`.
+curl -X POST --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: ROOTid' \
+  -d '{
+    "id":"Org1",
+    "name":"Organization 1",
+    "description":"The First Organization",
+    "user":{"id":"Rachel","name":"Rachel Owner"}
+  }' \
+  'http://localhost:8080/authorization/organizations'
+
+# Create a user called Sam.  The organization super user account is used to
+# create this user.
+curl -X POST --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: Rachel' \
+  -d '{"id":"Sam","name":"Sam Staffman"}' \
+  'http://localhost:8080/authorization/users'
 
 # Create a team for staff.
-curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: ROOTid' --header 'org: Org1' -d '{"id":"staff","name":"Staff", "description":"Organization 1 Staff","metadata":{}}' 'http://localhost:8080/authorization/teams'
+curl -X POST --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: ROOTid' \
+  --header 'org: Org1' \
+  -d '{
+    "id":"staff",
+    "name":"Staff",
+    "description":"Organization 1 Staff",
+    "metadata":{}
+  }' \
+  'http://localhost:8080/authorization/teams'
 
 # Assign Sam to the staff team.
-curl -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: Rachel' -d '{"users":["Sam"]}' 'http://localhost:8080/authorization/teams/staff/users'
+curl -X PUT --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: Rachel' \
+  -d '{"users":["Sam"]}' \
+  'http://localhost:8080/authorization/teams/staff/users'
 
 # Create a user for Margaret.
-curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: Rachel'  -d '{"id":"Margaret","name":"Margaret Managerson"}' 'http://localhost:8080/authorization/users'
+curl -X POST --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: Rachel' \
+  -d '{"id":"Margaret","name":"Margaret Managerson"}' \
+  'http://localhost:8080/authorization/users'
 
 # Create a team for managers.
-curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: ROOTid' --header 'org: Org1' -d '{"id":"managers","name":"Managers", "description":"Organization 1 Managers","metadata":{}}' 'http://localhost:8080/authorization/teams'
+curl -X POST --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: ROOTid' \
+  --header 'org: Org1' \
+  -d '{
+    "id":"managers",
+    "name":"Managers",
+    "description":"Organization 1 Managers",
+    "metadata":{}
+  }' \
+  'http://localhost:8080/authorization/teams'
 
 # Assign Margaret to the managers team.
-curl -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: Rachel' -d '{"users":["Margaret"]}' 'http://localhost:8080/authorization/teams/managers/users'
+curl -X PUT --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: Rachel' \
+  -d '{"users":["Margaret"]}' \
+  'http://localhost:8080/authorization/teams/managers/users'
 
 # Add a policy that, when assigned, will allow creating products.
-curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: ROOTid' --header 'org: Org1' -d '{"id":"CreateProducts","name":"create  products","version":"1","statements":{"Statement":[{"Effect":"Allow","Action":["org1:action:create"],"Resource":["/products"],"Sid":"5","Condition":{}}]}}' 'http://localhost:8080/authorization/policies?sig=123456789'
+curl -X POST --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: ROOTid' \
+  --header 'org: Org1' \
+  -d '{
+    "id":"CreateProducts",
+    "name":"create  products",
+    "version":"1",
+    "statements":{
+      "Statement":[{
+        "Effect":"Allow",
+        "Action":["org1:action:create"],
+        "Resource":["/products"],
+        "Sid":"5",
+        "Condition":{}
+      }]
+    }
+  }' \
+  'http://localhost:8080/authorization/policies?sig=123456789'
 
 # Add a policy that, when assigned, will allow listing products.
-curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: ROOTid' --header 'org: Org1' -d '{"id":"ListProducts","name":"list  products","version":"1","statements":{"Statement":[{"Effect":"Allow","Action":["org1:action:list"],"Resource":["/products"],"Sid":"4","Condition":{}}]}}' 'http://localhost:8080/authorization/policies?sig=123456789'
+curl -X POST --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: ROOTid' \
+  --header 'org: Org1' \
+  -d '{
+    "id":"ListProducts",
+    "name":"list  products",
+    "version":"1",
+    "statements":{
+      "Statement":[{
+        "Effect":"Allow",
+        "Action":["org1:action:list"],
+        "Resource":["/products"],
+        "Sid":"4",
+        "Condition":{}
+      }]
+    }
+  }' \
+  'http://localhost:8080/authorization/policies?sig=123456789'
 
 # Allow staff to list products only.
-curl -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: Rachel' -d '{"policies":[{"id": "ListProducts"}]}' 'http://localhost:8080/authorization/teams/staff/policies'
+curl -X PUT --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: Rachel' \
+  -d '{"policies":[{"id": "ListProducts"}]}' \
+  'http://localhost:8080/authorization/teams/staff/policies'
 
 # Allow managers to list products.
-curl -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: Rachel' -d '{"policies":[{"id": "ListProducts"}]}' 'http://localhost:8080/authorization/teams/managers/policies'
+curl -X PUT --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: Rachel' \
+  -d '{"policies":[{"id": "ListProducts"}]}' \
+  'http://localhost:8080/authorization/teams/managers/policies'
 
 # Also allow managers to create products.
-curl -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: Rachel' -d '{"policies":[{"id": "CreateProducts"}]}' 'http://localhost:8080/authorization/teams/managers/policies'
+curl -X PUT --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: Rachel' -d \
+  '{ "policies":[{"id": "CreateProducts"}]}' \
+  'http://localhost:8080/authorization/teams/managers/policies'
 
 # Add a policy that, when assigned, allows using the batch access endpoint.
-curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: ROOTid' --header 'org: Org1' -d '{"id":"CheckAccess","name":"batch access check","version":"1","statements":{"Statement":[{"Effect":"Allow","Action":["authorization:authn:batch:access"],"Resource":["authorization/batchaccess"],"Sid":"2","Condition":{}}]}}' 'http://localhost:8080/authorization/policies?sig=123456789'
+curl -X POST --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: ROOTid' \
+  --header 'org: Org1' \
+  -d '{
+    "id":"CheckAccess",
+    "name":"batch access check",
+    "version":"1",
+    "statements":{
+      "Statement":[{
+        "Effect":"Allow",
+        "Action":["authorization:authn:batch:access"],
+        "Resource":["authorization/batchaccess"],
+        "Sid":"2",
+        "Condition":{}
+      }]
+    }
+  }' \
+  'http://localhost:8080/authorization/policies?sig=123456789'
 
 # Allow the whole organization to use the batch access endpoint.
-curl -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'authorization: ROOTid' -d '{"policies":[{"id": "CheckAccess"}]}' 'http://localhost:8080/authorization/organizations/Org1/policies'
+curl -X PUT --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header 'Authorization: ROOTid' \
+  -d '{"policies":[{"id": "CheckAccess"}]}' \
+  'http://localhost:8080/authorization/organizations/Org1/policies'
