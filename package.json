@@ -1,0 +1,18 @@
+{
+  "name": "udaru-roles-example",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@nearform/udaru-hapi-server": "^5.2.1",
+    "joi": "^13.4.0",
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
+    "react-scripts": "1.1.4"
+  },
+  "proxy": "http://localhost:8080",
+  "scripts": {
+    "build": "react-scripts build",
+    "pg:init": "udaru-init && udaru-migrate --version=max && udaru-loadTestData",
+    "start": "react-scripts start"
+  }
+}
