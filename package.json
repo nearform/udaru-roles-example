@@ -5,8 +5,8 @@
   "dependencies": {
     "@nearform/udaru-hapi-server": "^5.2.1",
     "joi": "^13.4.0",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
     "react-scripts": "1.1.4"
   },
   "proxy": "http://localhost:8080",

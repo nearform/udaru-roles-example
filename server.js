@@ -2,6 +2,7 @@
 
 const Joi = require('joi')
 const UdaruServer = require('@nearform/udaru-hapi-server')
+const { Actions, Resources } = require('./src/permissions')
 
 // In production, this would be persisted in the data store, but using an
 // in-memory array is expedient for this example.
@@ -17,8 +18,8 @@ UdaruServer.route({
   config: {
     plugins: {
       auth: {
-        action: 'org1:action:delete',
-        resource: '/products'
+        action: Actions.Delete,
+        resource: Resources.Products
       }
     }
   }
@@ -31,8 +32,8 @@ UdaruServer.route({
   config: {
     plugins: {
       auth: {
-        action: 'org1:action:list',
-        resource: '/products'
+        action: Actions.List,
+        resource: Resources.Products
       }
     }
   }
@@ -48,8 +49,8 @@ UdaruServer.route({
   config: {
     plugins: {
       auth: {
-        action: 'org1:action:create',
-        resource: '/products'
+        action: Actions.Create,
+        resource: Resources.Products
       }
     },
     validate: {
@@ -70,8 +71,8 @@ UdaruServer.route({
   config: {
     plugins: {
       auth: {
-        action: 'org1:action:append',
-        resource: '/products'
+        action: Actions.Append,
+        resource: Resources.Products
       }
     },
     validate: {
@@ -92,8 +93,8 @@ UdaruServer.route({
   config: {
     plugins: {
       auth: {
-        action: 'org1:action:reverse',
-        resource: '/products'
+        action: Actions.Reverse,
+        resource: Resources.Products
       }
     }
   }

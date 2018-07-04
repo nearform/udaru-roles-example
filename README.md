@@ -4,16 +4,20 @@ This is an example of using Udaru's policy based access control (PBAC) features 
 
 ## Quick Start
 
- - To start PostgreSQL: `docker-compose up -d`
- - To initialise PostgreSQL: `npm run pg:init`
- - To start the back end: `node server`
- - To create Udaru users, policies, etc.: `./create-policies`
- - To start the front end: `npm start`
+ - Start PostgreSQL: `docker-compose up -d`
+ - Initialise PostgreSQL: `npm run pg:init`
+ - Start the back end: `node server`
+ - Create Udaru users, policies, etc.: run the `./create-policies` script
+ - Start the front end: `npm start`
  - Visit [http://localhost:3000](http://localhost:3000) in your browser!
 
 ## Udaru Configuration
 
-This example uses four users and two teams.  First there is a special root user created when `npm run pg:init` is run.  This user has access to everything by default.
+This example uses four users and two teams.
+
+![](./img/org.png)
+
+First there is a special root user created when `npm run pg:init` is run.  This user has access to everything by default.
 
 Another user is "Rachel Owner" who is the organization owner.  She has certain administrative privileges within Udaru, but does not have any policies that grant her access to the `/products` resource.  Rachel and the root user's accounts are used to authenticate API calls in [./create-policies](./create-policies).
 
@@ -27,7 +31,7 @@ To see the API calls used to initialize the Udaru policies for this example, alo
 
 ## Back End
 
-The [back end](./server.js) is Hapi server.  The server hosts Udaru endpoints added with the Hapi plugin.  For this example, two additional endpoints have been added.  First, there is the `/products` endpoint.  It allows the `DELETE`, `GET`, `POST`, and `PUT` methods.  There is also a `/products/reverse` endpoint that allows `POST` requests.
+The [back end](./server.js) is a Hapi server.  The server hosts Udaru endpoints added with the Hapi plugin.  For this example, two additional endpoints have been added.  First, there is the `/products` endpoint.  It allows the `DELETE`, `GET`, `POST`, and `PUT` methods.  There is also a `/products/reverse` endpoint that allows `POST` requests.
 
 To secure a route with Udaru, the route code itself does not need to incorporate knowledge of how the system will authorize requests.  Instead, configuration values are added that define what action and resource should be checked against the policies for the user authenticated for that request.
 
