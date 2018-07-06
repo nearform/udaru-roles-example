@@ -1,6 +1,7 @@
 import './App.css';
 import React, { Component } from 'react';
 import UdaruLogo from './udaru.png'
+import { Actions, Resources } from './permissions'
 
 const defaultUserId = 'Sam'
 
@@ -15,21 +16,6 @@ const fetchJSON = async (...parameters) => {
 }
 
 class App extends Component {
-  async appendMessage () {
-    try {
-      const products = await fetchJSON('/products', {
-        body: prompt('Append a string to each product name:'),
-        headers: { Authorization: this.state.userId },
-        method: 'PUT'
-      })
-
-      this.setState({ error: null, products })
-    }
-    catch (error) {
-      this.setState({ error })
-    }
-  }
-
   constructor (props) {
     super(props)
     this.appendMessage = this.appendMessage.bind(this)
@@ -43,6 +29,21 @@ class App extends Component {
     this.changeUser({ target: { value: defaultUserId } })
   }
 
+  async appendMessage () {
+    try {
+      const products = await fetchJSON('/products', {
+        body: prompt('Append a string to each product name:'),
+        headers: { Authorization: this.state.userId },
+        method: 'PUT'
+      })
+
+      this.setState({ error: null, products })
+    }
+    catch (error) {
+      this.setState({ error, products: [] })
+    }
+  }
+
   async changeUser (event) {
     const userId = event.target.value
 
@@ -50,11 +51,11 @@ class App extends Component {
       const resources = await fetchJSON(`/authorization/access/${userId}`, {
         body: JSON.stringify({
           resourceBatch: [
-            { action: 'org1:action:create', resource: '/products' },
-            { action: 'org1:action:list', resource: '/products' },
-            { action: 'org1:action:delete', resource: '/products' },
-            { action: 'org1:action:append', resource: '/products' },
-            { action: 'org1:action:reverse', resource: '/products' }
+            { action: Actions.Create, resource: Resources.Products },
+            { action: Actions.List, resource: Resources.Products },
+            { action: Actions.Delete, resource: Resources.Products },
+            { action: Actions.Append, resource: Resources.Products },
+            { action: Actions.Reverse, resource: Resources.Products }
           ]
         }),
         headers: { Authorization: userId },
@@ -74,6 +75,8 @@ class App extends Component {
   async create () {
     const input = prompt('Please enter product names:',
       'productA, productB, productC')
+    if (!input) return
+
     const names = input.split(',').map((s) => s.trim())
 
     try {
@@ -85,7 +88,7 @@ class App extends Component {
       this.setState({ error: null, products })
     }
     catch (error) {
-      this.setState({ error })
+      this.setState({ error, products: [] })
     }
   }
 
@@ -99,7 +102,7 @@ class App extends Component {
       this.setState({ error: null, products })
     }
     catch (error) {
-      this.setState({ error })
+      this.setState({ error, products: [] })
     }
   }
 
@@ -113,6 +116,21 @@ class App extends Component {
     }
     catch (error) {
       this.setState({ error })
+    }
+  }
+
+  async reverse () {
+    try {
+      const products = await fetchJSON('/products/reverse', {
+        body: '{}',
+        headers: { Authorization: this.state.userId },
+        method: 'POST'
+      })
+
+      this.setState({ error: null, products })
+    }
+    catch (error) {
+      this.setState({ error, products: [] })
     }
   }
 
@@ -142,36 +160,21 @@ class App extends Component {
         </div>
         <hr />
         <div>
-          <button className={classNameFor['org1:action:list']}
+          <button className={classNameFor[Actions.List]}
             onClick={this.list}>List</button>
-          <button className={classNameFor['org1:action:create']}
+          <button className={classNameFor[Actions.Create]}
             onClick={this.create}>Create</button>
-          <button className={classNameFor['org1:action:delete']}
+          <button className={classNameFor[Actions.Delete]}
             onClick={this.deleteAll}>Delete All</button>
-          <button className={classNameFor['org1:action:append']}
+          <button className={classNameFor[Actions.Append]}
             onClick={this.appendMessage}>Append Message</button>
-          <button className={classNameFor['org1:action:reverse']}
+          <button className={classNameFor[Actions.Reverse]}
             onClick={this.reverse}>Reverse</button>
         </div>
         <div className="error">{errorMessage}</div>
         <div>{sortedProductDivs}</div>
       </div>
     )
-  }
-
-  async reverse () {
-    try {
-      const products = await fetchJSON('/products/reverse', {
-        body: '{}',
-        headers: { Authorization: this.state.userId },
-        method: 'POST'
-      })
-
-      this.setState({ error: null, products })
-    }
-    catch (error) {
-      this.setState({ error })
-    }
   }
 }
 

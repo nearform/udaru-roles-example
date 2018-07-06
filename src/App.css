@@ -26,6 +26,7 @@ button {
   border: 0;
   color: #f0f0f0;
   padding: 0.67em;
+  margin-right: 0.25em;
 }
 
 button.allowed {
